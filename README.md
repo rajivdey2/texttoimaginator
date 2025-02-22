@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/2cbe9f80-5ab4-498b-a605-6969135776e7
+**URL to run the app**: https://texttoimaginator.lovable.app
 
 ## How can I edit this code?
 
