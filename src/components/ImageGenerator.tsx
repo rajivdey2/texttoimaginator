@@ -27,6 +27,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
     }
 
     setIsGenerating(true);
+    setGeneratedImage(null); // Clear previous image
+    
     try {
       const params: GenerateImageParams = {
         positivePrompt: prompt,
@@ -36,11 +38,26 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
       };
 
       const result = await runwareService.generateImage(params);
-      setGeneratedImage(result.imageURL);
-      toast({
-        title: "Image generated successfully",
-        description: "Your image is ready to view",
-      });
+      console.log("Generated image result:", result); // Debug log
+      
+      // Create a new Image object to ensure the image loads
+      const img = new Image();
+      img.onload = () => {
+        setGeneratedImage(result.imageURL);
+        toast({
+          title: "Image generated successfully",
+          description: "Your image is ready to view",
+        });
+      };
+      img.onerror = () => {
+        toast({
+          title: "Error loading image",
+          description: "The image could not be loaded",
+          variant: "destructive",
+        });
+      };
+      img.src = result.imageURL;
+      
     } catch (error) {
       toast({
         title: "Error generating image",
@@ -89,14 +106,28 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
           <h3 className="text-lg font-medium">Result</h3>
           <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-secondary/30">
             {isGenerating ? (
-              <div className="absolute inset-0 flex items-center justify-center shimmer">
-                <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                <div className="relative w-16 h-16">
+                  <Loader2 className="absolute inset-0 h-full w-full animate-spin text-primary/30" />
+                  <Loader2 className="absolute inset-0 h-full w-full animate-spin text-primary/20" style={{ animationDelay: "0.1s" }} />
+                  <Loader2 className="absolute inset-0 h-full w-full animate-spin text-primary/10" style={{ animationDelay: "0.2s" }} />
+                </div>
+                <div className="text-sm text-muted-foreground animate-pulse">
+                  Generating your masterpiece...
+                </div>
               </div>
             ) : generatedImage ? (
               <img
                 src={generatedImage}
                 alt="Generated image"
                 className="w-full h-full object-cover fade-in"
+                onError={() => {
+                  toast({
+                    title: "Error loading image",
+                    description: "The image could not be loaded",
+                    variant: "destructive",
+                  });
+                }}
               />
             ) : null}
           </div>
