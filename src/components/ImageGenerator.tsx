@@ -14,6 +14,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const { toast } = useToast();
   const runwareService = new RunwareService(apiKey);
 
@@ -40,16 +41,20 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
       const result = await runwareService.generateImage(params);
       console.log("Generated image result:", result); // Debug log
       
-      // Create a new Image object to ensure the image loads
+      // Pre-load the image
+      setIsImageLoading(true);
       const img = new Image();
       img.onload = () => {
         setGeneratedImage(result.imageURL);
+        setIsImageLoading(false);
         toast({
           title: "Image generated successfully",
           description: "Your image is ready to view",
         });
       };
       img.onerror = () => {
+        setIsImageLoading(false);
+        setGeneratedImage(null);
         toast({
           title: "Error loading image",
           description: "The image could not be loaded",
@@ -64,6 +69,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
         description: error.message,
         variant: "destructive",
       });
+      setGeneratedImage(null);
     } finally {
       setIsGenerating(false);
     }
@@ -101,11 +107,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
         </div>
       </div>
 
-      {(isGenerating || generatedImage) && (
+      {(isGenerating || isImageLoading || generatedImage) && (
         <div className="glass-panel rounded-2xl p-6 space-y-4">
           <h3 className="text-lg font-medium">Result</h3>
           <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-secondary/30">
-            {isGenerating ? (
+            {(isGenerating || isImageLoading) ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                 <div className="relative w-16 h-16">
                   <Loader2 className="absolute inset-0 h-full w-full animate-spin text-primary/30" />
@@ -113,15 +119,16 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ apiKey }) => {
                   <Loader2 className="absolute inset-0 h-full w-full animate-spin text-primary/10" style={{ animationDelay: "0.2s" }} />
                 </div>
                 <div className="text-sm text-muted-foreground animate-pulse">
-                  Generating your masterpiece...
+                  {isGenerating ? "Generating your masterpiece..." : "Loading image..."}
                 </div>
               </div>
             ) : generatedImage ? (
               <img
                 src={generatedImage}
                 alt="Generated image"
-                className="w-full h-full object-cover fade-in"
+                className="w-full h-full object-cover"
                 onError={() => {
+                  setGeneratedImage(null);
                   toast({
                     title: "Error loading image",
                     description: "The image could not be loaded",
