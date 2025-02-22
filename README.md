@@ -3,6 +3,7 @@
 ## Project info
 
 **URL to run the app**: https://texttoimaginator.lovable.app
+**API_KEY** : <code>2EZSWr0HL8hNEJs0oMqFNfA9feygUJYD</code>
 
 ## How can I edit this code?
 
