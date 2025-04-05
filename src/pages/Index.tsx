@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  // Pre-fill the API key and set isKeySet to true
-  const [apiKey] = useState("2EZSWr0HL8hNEJs0oMqFNfA9feygUJYD");
+  // Update the API key to the new one
+  const [apiKey] = useState("tbhoAIuxAahCTUUFu8deS8UYhgWJdAgo");
   const [isKeySet] = useState(true);
 
   return (
